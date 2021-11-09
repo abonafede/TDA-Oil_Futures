@@ -67,7 +67,6 @@ def plot_crash_detections(
         loc="best",
         prop={"size": 10},
     )
-    plt.savefig(f'./images/crash_{metric_name}.png')
     plt.show()
     
     
@@ -170,5 +169,4 @@ def plot_crash_comparisons(
         prop={"size": 10},
     )
 
-    plt.savefig('./images/crash_comparison.png')
     plt.show()
