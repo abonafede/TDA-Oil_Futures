@@ -8,6 +8,7 @@ def plot_crash_detections(
     start_date,
     end_date,
     threshold,
+    buy_threshold,
     distances,
     time_index_derivs,
     price_resampled_derivs,
@@ -44,7 +45,8 @@ def plot_crash_detections(
 
     plt.subplot(1, 2, 1)
     plt.plot(time_index_region, probability_of_crash_h_region, color="#1f77b4")
-    plt.axhline(y=threshold, linewidth=2, color='#ff7f0e', linestyle='--', label='Threshold')
+    plt.axhline(y=threshold, linewidth=2, color='#ff7f0e', linestyle='--', label='Sell Threshold')
+    plt.axhline(y=buy_threshold, linewidth=2, color='red', linestyle='--', label='Buy Threshold')
     plt.title(f"Crash Probability Based on {metric_name}")
     plt.legend(loc="best", prop={"size": 10},)
 
@@ -53,9 +55,14 @@ def plot_crash_detections(
         resampled_close_price_region[probability_of_crash_h_region.values > threshold],
         '#ff7f0e', marker='.', linestyle='None', markersize=4
     )
+    
     plt.plot(
         resampled_close_price_region[probability_of_crash_h_region.values <= threshold],
         color="#1f77b4", marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_h_region.values <= buy_threshold],
+        color='red', marker='.', linestyle='None', markersize=4
     )
 
     plt.title("Close Price")
