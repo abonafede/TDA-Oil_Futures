@@ -81,6 +81,7 @@ def plot_crash_comparisons(
     start_date,
     end_date,
     threshold,
+    buy_threshold,
     distances_1,
     distances_2,
     time_index_derivs,
@@ -144,6 +145,10 @@ def plot_crash_comparisons(
         resampled_close_price_region[probability_of_crash_1_region.values <= threshold],
         "#1f77b4", marker='.', linestyle='None', markersize=4
     )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_1_region.values <= buy_threshold],
+        "red", marker='.', linestyle='None', markersize=4
+    )
 
     plt.title("Baseline Detector")
     plt.ylabel('Close Price', fontsize=12)
@@ -164,6 +169,10 @@ def plot_crash_comparisons(
     plt.plot(
         resampled_close_price_region[probability_of_crash_2_region.values <= threshold],
         "#1f77b4", marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_2_region.values <= buy_threshold],
+        "red", marker='.', linestyle='None', markersize=4
     )
 
     plt.title('Topological Detector')
