@@ -262,3 +262,118 @@ def plot_crash_detections_std(
         prop={"size": 10},
     )
     plt.show()
+
+def plot_crash_comparisons_std(
+    start_date,
+    end_date,
+    coefficient,
+    distances_1,
+    distances_2,
+    time_index_derivs,
+    price_resampled_derivs,
+):
+
+    # calculate rolling mean, min, max of homological derivatives
+    rolled_mean_1 = pd.Series(distances_1).rolling(20, min_periods=1).mean()
+    rolled_min_1 = (
+        pd.Series(distances_1)
+        .rolling(len(distances_1), min_periods=1)
+        .min()
+    )
+    rolled_max_1 = (
+        pd.Series(distances_1)
+        .rolling(len(distances_1), min_periods=1)
+        .max()
+    )
+
+    # normalise the time series values to lies within [0, 1]
+    probability_of_crash_1 = (rolled_mean_1 - rolled_min_1) / (
+        rolled_max_1 - rolled_min_1
+    )
+
+    # calculate rolling mean, min, max of homological derivatives
+    rolled_mean_2 = pd.Series(distances_2).rolling(20, min_periods=1).mean()
+    rolled_min_2 = (
+        pd.Series(distances_2)
+        .rolling(len(distances_2), min_periods=1)
+        .min()
+    )
+    rolled_max_2 = (
+        pd.Series(distances_2)
+        .rolling(len(distances_2), min_periods=1)
+        .max()
+    )
+
+    # normalise the time series values to lies within [0, 1]
+    probability_of_crash_2 = (rolled_mean_2 - rolled_min_2) / (
+        rolled_max_2 - rolled_min_2
+    )
+
+    # define time intervals to plots
+    is_date_in_interval = (time_index_derivs > pd.Timestamp(start_date)) & (
+        time_index_derivs < pd.Timestamp(end_date)
+    )
+    probability_of_crash_1_region = probability_of_crash_1[is_date_in_interval]
+    probability_of_crash_2_region = probability_of_crash_2[is_date_in_interval]
+
+    time_index_region = time_index_derivs[is_date_in_interval]
+    resampled_close_price_region = price_resampled_derivs.loc[is_date_in_interval]
+
+    threshold = np.mean(probability_of_crash_1_region) + coefficient * np.std(probability_of_crash_1_region.values)
+    buy_threshold = np.mean(probability_of_crash_1_region.values) - coefficient * np.std(probability_of_crash_1_region.values)
+
+    plt.figure(figsize=(15, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_1_region.values > threshold],
+        '#ff7f0e', marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_1_region.values <= threshold],
+        "#1f77b4", marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_1_region.values <= buy_threshold],
+        "red", marker='.', linestyle='None', markersize=4
+    )
+
+    plt.title("Baseline Detector")
+    plt.ylabel('Close Price', fontsize=12)
+    plt.legend(
+        [
+            "Crash probability > {0}%".format(int(threshold * 100)),
+            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+        ],
+        loc="best",
+        prop={"size": 10},
+    )
+
+    threshold = np.mean(probability_of_crash_2_region) + coefficient * np.std(probability_of_crash_2_region.values)
+    buy_threshold = np.mean(probability_of_crash_2_region.values) - coefficient * np.std(probability_of_crash_2_region.values)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_2_region.values > threshold],
+        '#ff7f0e', marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_2_region.values <= threshold],
+        "#1f77b4", marker='.', linestyle='None', markersize=4
+    )
+    plt.plot(
+        resampled_close_price_region[probability_of_crash_2_region.values <= buy_threshold],
+        "red", marker='.', linestyle='None', markersize=4
+    )
+
+    plt.title('Topological Detector')
+    plt.legend(
+        [
+            "Crash probability > {0}%".format(int(threshold * 100)),
+            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+        ],
+        loc="best",
+        prop={"size": 10},
+    )
+
+    plt.show()
