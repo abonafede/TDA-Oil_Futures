@@ -257,12 +257,13 @@ def plot_crash_detections_std(
         [
             "Crash threshold > {0}".format(round(threshold, 3)),
             "Crash threshold ≤ {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(buy_threshold, 3))
         ],
         loc="best",
         prop={"size": 10},
     )
     plt.show()
-    plt.savefig(fname = metric_name, format = 'png')
+    plt.savefig(fname = metric_name + ".png")
 
 def plot_crash_comparisons_std(
     start_date,
@@ -271,7 +272,7 @@ def plot_crash_comparisons_std(
     distances_1,
     distances_2,
     time_index_derivs,
-    price_resampled_derivs,
+    price_resampled_derivs
 ):
 
     # calculate rolling mean, min, max of homological derivatives
@@ -378,4 +379,71 @@ def plot_crash_comparisons_std(
     )
 
     plt.show()
-    plt.savefig(fname="comparison", format='png')
+    plt.savefig(fname="comparison.png", format='png')
+
+def calc_returns(
+        start_date,
+        end_date,
+        coefficient,
+        distances,
+        time_index_derivs,
+        price_resampled_derivs,
+        metric_name
+):
+    # calculate rolling mean, min, max of homological derivatives
+    rolled_mean_h = pd.Series(distances).rolling(20, min_periods=1).mean()
+    rolled_min_h = (
+        pd.Series(distances)
+            .rolling(len(distances), min_periods=1)
+            .min()
+    )
+    rolled_max_h = (
+        pd.Series(distances)
+            .rolling(len(distances), min_periods=1)
+            .max()
+    )
+
+    # normalise the time series values to lies within [0, 1]
+    probability_of_crash_h = (rolled_mean_h - rolled_min_h) / (
+            rolled_max_h - rolled_min_h
+    )
+
+    # define time intervals to plots
+    is_date_in_interval = (time_index_derivs > pd.Timestamp(start_date)) & (
+            time_index_derivs < pd.Timestamp(end_date)
+    )
+    probability_of_crash_h_region = probability_of_crash_h[is_date_in_interval]
+    time_index_region = time_index_derivs[is_date_in_interval]
+    resampled_close_price_region = price_resampled_derivs.loc[is_date_in_interval]
+
+    threshold = np.mean(probability_of_crash_h_region) + coefficient * np.std(probability_of_crash_h_region.values)
+    buy_threshold = np.mean(probability_of_crash_h_region.values) - coefficient * np.std(
+        probability_of_crash_h_region.values)
+
+
+    balance = 0
+    units = 0
+    # buying the first unit
+    for i in range(len(resampled_close_price_region)):
+        prob = probability_of_crash_h_region.values[i]
+        price = resampled_close_price_region.values[i]
+
+        if prob <= buy_threshold:
+            units += 100000 / price
+            break
+
+    for i in range(len(resampled_close_price_region)):
+        prob = probability_of_crash_h_region.values[i]
+        new_price = resampled_close_price_region.values[i]
+
+        if prob > threshold:
+            balance += units * new_price
+            units = 0
+
+        if prob <= buy_threshold:
+            units += balance/new_price
+            balance = 0
+
+    price = resampled_close_price_region.values[-1]
+    balance = units * price
+    return balance
