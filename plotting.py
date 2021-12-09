@@ -69,8 +69,8 @@ def plot_crash_detections(
     plt.title("Close Price")
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
@@ -155,8 +155,8 @@ def plot_crash_comparisons(
     plt.ylabel('Close Price', fontsize=12)
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
@@ -179,8 +179,8 @@ def plot_crash_comparisons(
     plt.title('Topological Detector')
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
@@ -255,13 +255,14 @@ def plot_crash_detections_std(
     plt.title("Close Price")
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
     )
     plt.show()
+    plt.savefig(fname = metric_name, format = 'png')
 
 def plot_crash_comparisons_std(
     start_date,
@@ -342,8 +343,8 @@ def plot_crash_comparisons_std(
     plt.ylabel('Close Price', fontsize=12)
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
@@ -369,11 +370,12 @@ def plot_crash_comparisons_std(
     plt.title('Topological Detector')
     plt.legend(
         [
-            "Crash probability > {0}%".format(int(threshold * 100)),
-            "Crash probability ≤ {0}%".format(int(threshold * 100)),
+            "Crash threshold > {0}".format(round(threshold, 3)),
+            "Crash threshold ≤ {0}".format(round(threshold, 3)),
         ],
         loc="best",
         prop={"size": 10},
     )
 
     plt.show()
+    plt.savefig(fname="comparison", format='png')
